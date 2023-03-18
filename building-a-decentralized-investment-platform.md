@@ -68,9 +68,6 @@ The Solidity version pragma specifies the version of the Solidity programming la
 Following that, we define an `IERC20Token` interface which enables us to interact with the celo stablecoin (cUSD). 
 
 ```solidity
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.7.0 <0.9.0;
 
 interface IERC20Token {
   function transfer(address, uint256) external returns (bool);
