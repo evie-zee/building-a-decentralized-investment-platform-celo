@@ -55,16 +55,8 @@ pragma solidity >=0.7.0 <0.9.0;
 interface IERC20Token {
   function transfer(address, uint256) external returns (bool);
   
-  function approve(address, uint256) external returns (bool);
-  
   function transferFrom(address, address, uint256) external returns (bool);
   
-  function totalSupply() external view returns (uint256);
-  
-  function balanceOf(address) external view returns (uint256);
-  
-  function allowance(address, address) external view returns (uint256);
-
   event Transfer(address indexed from, address indexed to, uint256 value);
   
   event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -127,10 +119,8 @@ You are then going to declare the modifiers. Modifiers are functions that modify
         _;
     }
     
-    modifier isOwner(uint _index) {
-        require(msg.sender == investments[_index].investor,"Accessible only to the owner");
-        _;
-    }
+    event tokensInvested(address indexed investor, uint amount, uint timestamp, uint duration);
+    event paidInvestor(address indexed investor, uint amount, uint payoutTimeStamp, bool successfulPayout);
     
 ```
 The first modifier `isAdmin` takes an input parameter `id` of type `uint` and checks if the sender of the current message (i.e., the user who is interacting with the smart contract) is the same as the smart contract itself. If the sender is not the contract, then the function call will fail and display an error message "Accessible only to the admin". If the sender is the contract, then the function call will proceed and the _ placeholder will be replaced with the code of the function being modified.
@@ -166,7 +156,7 @@ function invest(
             false,
             block.timestamp
         );
-        
+        emit tokensInvested(msg.sender, _amount, block.timestamp, _duration);
         investmentLength++
     }
 ```
@@ -216,6 +206,7 @@ The investment details are retrieved from the `investments` array using the spec
 After you are done with this, you create a function to check if an investment is mature. 
 
 ```js
+ // function to check if the loan is mature we use a test period of 2 minutes
     function isInvestmentMature(uint _index)public view isAdmin(_index)returns(bool) {
         if(block.timestamp > (investments[_index].timestamp + 2 minutes)){
             return true;
@@ -238,6 +229,7 @@ You are then going to create the `payInvestor` and `isUserAdmin` functions. The 
                 investments[_index].amount+investments[_index].duration * 15/100
               ),    
               "This transaction could not be performed"
+              emit paidInvestor(investments[_index].investor, investments[_index].amount+investments[_index].duration * 15/100, block.timestamp, true);
         );
         investments[_index].isPaid = true;
     }
@@ -276,20 +268,12 @@ pragma solidity >=0.7.0 <0.9.0;
 
 interface IERC20Token {
     function transfer(address, uint256) external returns (bool);
-
-    function approve(address, uint256) external returns (bool);
-
+    
     function transferFrom(
         address,
         address,
         uint256
     ) external returns (bool);
-
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address) external view returns (uint256);
-
-    function allowance(address, address) external view returns (uint256);
 
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(
@@ -322,10 +306,8 @@ contract celoinvest{
         _;
     }
     
-    modifier isOwner(uint _index) {
-        require(msg.sender == investments[_index].investor,"Accessible only to the owner");
-        _;
-    }
+    event tokensInvested(address indexed investor, uint amount, uint timestamp, uint duration);
+    event paidInvestor(address indexed investor, uint amount, uint payoutTimeStamp, bool successfulPayout);
     
     function invest(
         string memory _name,
@@ -351,7 +333,7 @@ contract celoinvest{
             false,
             block.timestamp
         );
-        
+        emit tokensInvested(msg.sender, _amount, block.timestamp, _duration);
         investmentLength++;
     }
     
@@ -394,6 +376,7 @@ contract celoinvest{
               "This transaction could not be performed"
         );
         investments[_index].isPaid = true;
+        emit paidInvestor(investments[_index].investor, investments[_index].amount+investments[_index].duration * 15/100, block.timestamp, true);
     }
     // function to check if the user is an admin
     function isUserAdmin(address _address) public view returns (bool){
