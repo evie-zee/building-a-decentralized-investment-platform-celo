@@ -1,36 +1,36 @@
 
-## Introduction
-In this tutorial, we would build a mock investment platform that returns a 10% profit. This would be build on the celo blockchain. 
+## Introduction:
+In this tutorial, we will build a mock investment platform that returns a 10% profit. This will be build on the celo blockchain. 
 
-### What is  Celo 
-Celo is a blockchain platform that focuses on enabling mobile-first financial services. It is built using the Ethereum codebase and employs a proof-of-stake consensus mechanism for transaction validation. One unique aspect of Celo is its focus on usability and accessibility, aiming to create a more inclusive and decentralized financial system.
+### What is  Celo?
+Celo is a blockchain platform that enables mobile-first financial services. It is built using the Ethereum codebase and employs a proof-of-stake consensus mechanism for transaction validation. One unique aspect of Celo is its usability and accessibility, aiming to create a more inclusive and decentralized financial system.
 
-## Prerequisites
+## Prerequisites:
 
-- Prior knowledge of javascript
-- Familiarity with the command line
-- Basic understanding of blockchain concepts
-- Have some knowledge of solidity and its concepts
-- Have a basic understanding of **[React](https://react.org)**. Knowledge of JSX, props, state, and hooks.
+- Knowledge of javascript.
+- Familiar with the command line.
+- Basic understanding of blockchain concepts.
+- Some knowledge of solidity and its concepts.
+- Basic understanding of **[React](https://react.org)**. Knowledge of JSX, props, state, and hooks.
 
-## Requirements
-- **[NodeJS](https://nodejs.org/en/download)** from V12.or higher
-- A code editor or text editor. **[VSCode](https://code.visualstudio.com/download)** is recommended
-- A terminal. **[Git Bash](https://git-scm.com/downloads)** is recommended
-- An Internet Browser and a good internet connection
-- Remix
+## Requirements:
+- **[NodeJS](https://nodejs.org/en/download)** from V12.or higher.
+- A code editor or text editor. **[VSCode](https://code.visualstudio.com/download)** is recommended.
+- A terminal. **[Git Bash](https://git-scm.com/downloads)** is recommended.
+- An Internet Browser and a good internet connection.
+- [Remix](https://remix.ethereum.org)
 - Celo Extension Wallet.
 
 
 Screenshot: ![image](1.png)
 
 
-## Smart Contract Development
+## Smart Contract Development:
 
 Here is a preview of the Remix IDE:
 ![image](2.png)
 
-On Remix, We would create a new workspace and then a new file which we would name `invest.sol`
+On Remix, We will create a new workspace and then a new file which we would name `invest.sol`
 
 Starting in the first line, you include a statement that specifies the license under which the code is being released.
 
@@ -54,13 +54,19 @@ pragma solidity >=0.7.0 <0.9.0;
 
 interface IERC20Token {
   function transfer(address, uint256) external returns (bool);
+  
   function approve(address, uint256) external returns (bool);
+  
   function transferFrom(address, address, uint256) external returns (bool);
+  
   function totalSupply() external view returns (uint256);
+  
   function balanceOf(address) external view returns (uint256);
+  
   function allowance(address, address) external view returns (uint256);
 
   event Transfer(address indexed from, address indexed to, uint256 value);
+  
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 ```
@@ -90,13 +96,13 @@ contract celoinvest{
 Inside the contract, there is a data structure defined called "Investment". The Investment structure has several properties, including:
 
 - `investor`: This is the Ethereum address of the investor who is making the investment. The address is marked as payable, which means that funds can be sent to this address.
-- `name`: This is a string that represents the name of the investor.
-- `identificationNumber`: This is a string that represents a unique identification number for the investor.
+- `name`: A string that represents the name of the investor.
+- `identificationNumber`: A string that represents a unique identification number for the investor.
 - `amount`: This is a uint (unsigned integer) that represents the amount of ether (the cryptocurrency used on the Ethereum blockchain) that the investor is investing.
-- `duration`: This is a uint that represents the duration of the investment in some units of time (e.g. seconds).
-- `isMature`: This is a boolean value that will be set to true once the investment has reached maturity (i.e. the duration has passed).
-- `isPaid`: This is a boolean value that will be set to true once the investor has been paid back their investment.
-- `timestamp`: This is a uint that represents the timestamp (in seconds since the Unix epoch) at which the investment was made.
+- `duration`: A uint that represents the duration of the investment in some units of time (e.g. seconds).
+- `isMature`: A boolean value that will be set to true once the investment has reached maturity (i.e. the duration has passed).
+- `isPaid`: A boolean value that will be set to true once the investor has been paid back their investment.
+- `timestamp`: A uint that represents the timestamp (in seconds since the Unix epoch) at which the investment was made.
   
 
 ```js
@@ -113,7 +119,7 @@ The second line declares a mapping data structure called "investments" that asso
 
 The third line declares a variable named `cUsdTokenAddress` and assigns it a value of 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1. This is the address of a smart contract that represents `cUSD`
 
-You are then going to declare the modifiers. Modifiers are like functions that can modify the behaviour of other functions or methods they are applied to.
+You are then going to declare the modifiers. Modifiers are functions that modify the behaviour of other functions or methods they are applied to.
 
 ```js
     modifier isAdmin(uint _id){
@@ -403,7 +409,7 @@ contract celoinvest{
 }
 ```
 
-## Contract Deployment
+## Contract Deployment:
 
 To deploy the contract, we would need:
 1. [CeloExtensionWallet]((https://chrome.google.com/webstore/detail/celoextensionwallet/kkilomkmpmkbdnfelcpgckmpcaemjcdh?hl=en))
@@ -417,7 +423,7 @@ After downloading and creating your wallet, you will need to fund it using the C
 Next up, on remix, download and activate the celo plugin from the plugin manager. Connect your wallet and deploy your contract.
 
 
-## The HTML Part of the Dapp
+## The HTML Part of the Dapp:
 In the next step of the tutorial, you will begin building the foundation of your decentralized application (DApp) using HTML.
 
 First off, you would add the following folder name `assets` to the public folder. This has some CSS properties and images that would be used to enable you to build your dapp swiftly. ([Download it here](https://github.com/dahnny/celoinvest/tree/main/public/assets))
@@ -526,7 +532,7 @@ Open the index.html file located in the public folder of your project, and let's
 </html>
 ```
 
-## App.js
+## App.js:
 In a React application, the App.js file serves as the entry point for the frontend. Its main responsibility is to define the layout and structure of other components. The App component serves as the top-level container that holds all other components.
 The beginning of the App.js file typically consists of imports for necessary libraries, components, and hooks.
 
@@ -769,7 +775,7 @@ The third useEffect hook runs whenever the contract variable changes. If the con
 The JSX code in the return statement includes a Router component from the react-router-dom library, a Navbar component with `usdBalance` and `isAdmin` props, a `Switch` component with two Route components. The first Route component is for the home page and renders a Banner component with an invest prop. The second Route component is for the `/admin` path and renders a `MyAdmin` component with investments, matureHandler, and payInvestment props, but only if the `isAdmin` prop is truthy. Additionally, there is a `MyInvestments` component that renders a list of `userInvestments`.
 
 
-## Banner.js
+## Banner.js:
 This would be located in the `components` folder in the `src`folder.
 Copy the following code.
 
@@ -873,7 +879,7 @@ const Banner = (props) => {
 export default Banner;
 ```
 
-## MyAdmin.js
+## MyAdmin.js:
 
 ```js
 const MyAdmin = (props) => {
@@ -923,7 +929,7 @@ const MyAdmin = (props) => {
 export default MyAdmin;
 ```
 
-## MyInvestments
+## MyInvestments:
 
 ```js
 const MyInvestments = (props) => {
@@ -971,7 +977,7 @@ const MyInvestments = (props) => {
 export default MyInvestments;
 ```
 
-## Navbar.js
+## Navbar.js:
 
 ```js
 const MyInvestments = (props) => {
@@ -1018,6 +1024,8 @@ const MyInvestments = (props) => {
 
 export default MyInvestments;
 ```
+
+## Conclusion:
 
 After completing the development of your React DApp, you should attempt to compile it to ensure that it is functioning correctly. If everything appears to be working correctly, you can then deploy your DApp on platforms such as Github Pages or Netlify. For reference, you can use the project available at https://github.com/evie-zee/celoinvest as an example and obtain necessary files and images to edit your own project.
 
