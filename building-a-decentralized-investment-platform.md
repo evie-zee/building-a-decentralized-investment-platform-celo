@@ -119,24 +119,29 @@ Inside the contract body, we create a struct called "Investment". The Investment
 
 
 ```solidity
+    uint internal investmentLength = 0;
     uint internal taxFee = 1000000000000000000;
     mapping (uint => Investment) internal investments;
-        uint internal investmentLength = 0;
-
+    address public admin;
+    
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
 ```
 
-The first line declares a variable named `taxFee` and assigns it a value of `1000000000000000000`. , which is in wei and represents one cUSD.
+The first line declares a variable named `investmentLength` which will be used to keep track of the number of investments made.
 
-The second line declares a mapping data structure called "investments" that associates unsigned integer keys with "Investment" structs. This mapping is marked as `internal`, which means it can only be accessed from within the current contract.
+The second line declares a variable named `taxFee` and assigns it a value of `1000000000000000000`. , which is in wei and represents one cUSD.
 
-The third line declares a variable named `cUsdTokenAddress` and assigns it a value of `0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1`. This is the address of the cUSD smart contract.
+The third line declares a mapping data structure called `investments` that associates unsigned integer keys with `Investment` structs. This mapping is marked as `internal`, which means it can only be accessed from within the current contract.
+
+The fourth line declares a variable named `admin` that will be used to store the `address` of the deployer.
+
+The fifth line declares a variable named `cUsdTokenAddress` and assigns it a value of `0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1`. This is the address of the cUSD smart contract.
 
 You are then going to declare the modifiers. Modifiers are like functions that can modify the behavior of other functions or methods to which they are applied to.
 
 ```solidity
     modifier isAdmin(uint _id){
-         require(msg.sender == address(this),"Accessible only to the admin");
+         require(msg.sender == admin,"Accessible only to the admin");
         _;
     }
     
@@ -146,21 +151,23 @@ You are then going to declare the modifiers. Modifiers are like functions that c
     }
     
 ```
-The first modifier `isAdmin` takes an input parameter `id` of type `uint` and checks if the sender of the transaction(i.e., the user who is interacting with the smart contract) is the same as the smart contract itself. If the sender is not the contract, then the function call will fail and display an error message "Accessible only to the admin". If the sender is the contract, then the function call will proceed and the `_` placeholder will be replaced with the code of the function being modified.
+The first modifier `isAdmin` takes an input parameter `id` of type `uint` and checks if the sender of the transaction(i.e., the user who is interacting with the smart contract) is admin of the smart contract. If the sender is not the admin, then the function call will fail and display an error message "Accessible only to the admin". If the sender is the admin, then the function call will proceed and the `_` placeholder will be replaced with the code of the function being modified.
 
 The second modifier `isOwner` takes an input parameter `_index` of type `uint` and checks if the sender of the transaction is the same as the address stored in the `investor` property of the `Investment` struct associated with the given `index` in the `investments` mapping. If the sender is not the owner of that investment, then the function call will fail and display an error message "Accessible only to the owner". If the sender is the owner, then the function call will proceed and the `_` placeholder will be replaced with the code of the function being modified.
-
->**_Note_**: Please note that the `isAdmin` variable can take any address as this address would be in charge of receiving the funds and also making other changes in the smart contract_
 
 Following the previous declarations, you would then write the `invest()` function which is a `public` function, meaning that it can be called by anyone who has access to the smart contract.
 
 ```solidity
-function invest(
+    function invest(
         string memory _name,
         string memory _identification,
         uint _amount,
         uint _duration
     )public{
+        require(bytes(_name).length > 0, "Empty name");
+        require(bytes(_name).length > 0, "Empty name");
+        require(_amount > 0.1 ether, "Invalid amount");
+        require(_duration > 0, "Invalid duration");
         require(
               IERC20Token(cUsdTokenAddress).transferFrom(
                 msg.sender,
@@ -180,13 +187,13 @@ function invest(
             block.timestamp
         );
         
-        investmentLength++
+        investmentLength++;
     }
 ```
 
 The function takes in four input parameters of type `string`, `string`, `uint`, and `uint`, respectively. These input parameters are used to create a new `Investment` struct in the `investments` mapping.
 
-The first thing that the function does is to check if the smart contract can transfer the specified amount of `cUSD` from the sender's address (i.e., the address that called this function) to the smart contract's address. If the transfer fails for any reason, an error message "This transaction could not be performed" will be displayed.
+The function first checks if the input arguments are valid. It then checks whether the smart contract can transfer the specified amount of `cUSD` from the sender's address (i.e., the address that called this function) to the smart contract's address. If the transfer fails for any reason, an error message "This transaction could not be performed" will be displayed.
 
 If the transfer is successful, then a new `Investment` struct is created in the `investments` mapping. This object contains various properties, such as the investor's address, the investment amount, the investment duration, and a few flags indicating the status of the investment. The function then increments the `investmentLength` variable, which is used to keep track of the number of investments in the mapping.
 
@@ -244,26 +251,29 @@ You are then going to create the `payInvestor` and `isUserAdmin` functions. The 
 
 ```solidity
     function payInvestor(uint _index) public isAdmin(_index){
+        require(!investments[_index].isPaid, "Investment has already been paid");
+        require(isInvestmentMature(_index), "Investment duration isn't over yet");
         require(
               IERC20Token(cUsdTokenAddress).transfer(
                 investments[_index].investor,
-                investments[_index].amount+investments[_index].duration * 15/100
+                investments[_index].amount+ investments[_index].duration * 15/100
               ),    
               "This transaction could not be performed"
         );
         investments[_index].isPaid = true;
     }
-    // function to check if the user is an admin
+
+        // function to check if the user is an admin
     function isUserAdmin(address _address) public view returns (bool){
-        if(_address == address(this)){
+        if(_address == admin){
             return true;
         }
         return false;
     }
 ```
-The `payInvestor()` function has a parameter `_index`, which is used to identify the investment to be paid out. It uses the `isAdmin` modifier, which checks if the caller of the function is the admin, before executing the function. The `require` statement checks if the transfer of cUSD tokens from the smart contract to the investor's address was successful. If successful, the `isPaid` variable of the investment at the given index is set to `true`. The amount paid out to the investor is the sum of the investment amount and 15% of the investment duration.
+The `payInvestor()` function has a parameter `_index`, which is used to identify the investment to be paid out. It uses the `isAdmin` modifier, which checks if the caller of the function is the admin, before executing the function. The first two `require` statements ensure that only *unpaid* and *matured* investments can be paid. The third `require` statement checks if the transfer of cUSD tokens from the smart contract to the investor's address was successful. If successful, the `isPaid` variable of the investment at the given index is set to `true`. The amount paid out to the investor is the sum of the investment amount and 15% of the investment duration.
 
-The `isUserAdmin` function checks if the given address is the same as the contract's address. If it is, the function returns `true`, indicating that the address is an admin. If not, it returns `false`. You can use this function to check the admin status of an address before calling functions that require admin privileges, such as the `payInvestor` function.
+The `isUserAdmin()` function checks if the given address is the same as the admin's address. If it is, the function returns `true`, indicating that the address is an admin. If not, it returns `false`. You can use this function to check the admin status of an address before calling functions that require admin privileges, such as the `payInvestor()` function.
 
 
 Your final function would be the `getInvestmentLength()` which is marked with the `public` and `view` visibility modifiers. This function provides a way for external parties to read the value of the `investmentLength` state variable without modifying the state of the contract.
@@ -326,17 +336,22 @@ contract celoinvest{
     uint internal investmentLength = 0;
     uint internal taxFee = 1000000000000000000;
     mapping (uint => Investment) internal investments;
+    address public admin;
     
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
     
     modifier isAdmin(uint _id){
-         require(msg.sender == address(this),"Accessible only to the admin");
+         require(msg.sender == admin,"Accessible only to the admin");
         _;
     }
     
     modifier isOwner(uint _index) {
         require(msg.sender == investments[_index].investor,"Accessible only to the owner");
         _;
+    }
+
+    constructor(){
+        admin = msg.sender;
     }
     
     function invest(
@@ -345,6 +360,10 @@ contract celoinvest{
         uint _amount,
         uint _duration
     )public{
+        require(bytes(_name).length > 0, "Empty name");
+        require(bytes(_name).length > 0, "Empty name");
+        require(_amount > 0.1 ether, "Invalid amount");
+        require(_duration > 0, "Invalid duration");
         require(
               IERC20Token(cUsdTokenAddress).transferFrom(
                 msg.sender,
@@ -398,10 +417,12 @@ contract celoinvest{
     }
     
     function payInvestor(uint _index) public isAdmin(_index){
+        require(!investments[_index].isPaid, "Investment has already been paid");
+        require(isInvestmentMature(_index), "Investment duration isn't over yet");
         require(
               IERC20Token(cUsdTokenAddress).transfer(
                 investments[_index].investor,
-                investments[_index].amount+investments[_index].duration * 15/100
+                investments[_index].amount+ investments[_index].duration * 15/100
               ),    
               "This transaction could not be performed"
         );
@@ -409,7 +430,7 @@ contract celoinvest{
     }
     // function to check if the user is an admin
     function isUserAdmin(address _address) public view returns (bool){
-        if(_address == address(this)){
+        if(_address == admin){
             return true;
         }
         return false;
