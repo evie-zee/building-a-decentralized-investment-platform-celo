@@ -1,25 +1,45 @@
+# How to Build a Decentralized Investment Platform on the Celo Blockchain
+
+## Table of Content
+- [How to Build a Decentralized Investment Platform on the Celo Blockchain](#how-to-build-a-decentralized-investment-platform-on-the-celo-blockchain)
+  - [Table of Content](#table-of-content)
+  - [Introduction](#introduction)
+    - [What is  Celo](#what-is--celo)
+  - [Prerequisites](#prerequisites)
+  - [Requirements](#requirements)
+  - [Smart Contract Development](#smart-contract-development)
+  - [Contract Deployment](#contract-deployment)
+  - [The HTML Part of the Dapp](#the-html-part-of-the-dapp)
+  - [App.js](#appjs)
+  - [Banner.js](#bannerjs)
+  - [MyAdmin.js](#myadminjs)
+  - [MyInvestments](#myinvestments)
+  - [Navbar.js](#navbarjs)
+  - [Conclusion](#conclusion)
 
 ## Introduction
-In this tutorial, we would build a mock investment platform that returns a 10% profit. This would be build on the celo blockchain. 
+In this tutorial, we will build a mock investment platform that returns a 10% profit on the Celo blockchain. 
 
 ### What is  Celo 
 Celo is a blockchain platform that focuses on enabling mobile-first financial services. It is built using the Ethereum codebase and employs a proof-of-stake consensus mechanism for transaction validation. One unique aspect of Celo is its focus on usability and accessibility, aiming to create a more inclusive and decentralized financial system.
 
 ## Prerequisites
 
-- Prior knowledge of javascript
-- Familiarity with the command line
-- Basic understanding of blockchain concepts
-- Have some knowledge of solidity and its concepts
-- Have a basic understanding of **[React](https://react.org)**. Knowledge of JSX, props, state, and hooks.
+- Prior knowledge of JavaScript.
+- Familiarity with the command line.
+- Basic understanding of blockchain concepts.
+- Have some knowledge of Solidity and its concepts.
+- Have a basic understanding of **[React](https://react.org)**. 
+- Knowledge of JSX, props, state, and hooks.
 
 ## Requirements
-- **[NodeJS](https://nodejs.org/en/download)** from V12.or higher
-- A code editor or text editor. **[VSCode](https://code.visualstudio.com/download)** is recommended
-- A terminal. **[Git Bash](https://git-scm.com/downloads)** is recommended
-- An Internet Browser and a good internet connection
-- Remix
-- Celo Extension Wallet.
+
+- **[NodeJS](https://nodejs.org/en/download)** from V12.or higher.
+- A code editor or text editor. **[VSCode](https://code.visualstudio.com/download)** is recommended.
+- A terminal. **[Git Bash](https://git-scm.com/downloads)** is recommended.
+- An Internet Browser and a good internet connection.
+- The [Remix IDE](https://remix.ethereum.org/).
+- [Celo Extension Wallet](https://docs.celo.org/wallet#celoextensionwallet).
 
 
 Screenshot: ![image](1.png)
@@ -34,23 +54,20 @@ On Remix, We would create a new workspace and then a new file which we would nam
 
 Starting in the first line, you include a statement that specifies the license under which the code is being released.
 
-```js
+```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 ```
 
-The first line is a SPDX license identifier and a Solidity version pragma.
+The first line is an SPDX license identifier and a Solidity version pragma.
 
-SPDX (Software Package Data Exchange) is a specification that provides a standard way to declare the license of open source software packages. The SPDX-License-Identifier is a header that specifies the license of a given source code file.
+SPDX (Software Package Data Exchange) is a specification that provides a standard way to declare the license of open-source software packages. The SPDX-License-Identifier is a header that specifies the license of a given source code file.
 The Solidity version pragma specifies the version of the Solidity programming language used to write the smart contract code. The version range specified is greater than or equal to 0.7.0 and less than 0.9.0, meaning that the code should be compiled with a Solidity compiler version between 0.7.0 and 0.8.x.
 
 
 Following that, we define an `IERC20Token` interface which enables us to interact with the celo stablecoin (cUSD). 
 
-```js
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.7.0 <0.9.0;
+```solidity
 
 interface IERC20Token {
   function transfer(address, uint256) external returns (bool);
@@ -67,13 +84,13 @@ interface IERC20Token {
 
 ERC-20 tokens are a widely-used standard for creating digital assets on the Ethereum blockchain, and cUSD is one of them.
 
-These tokens have pre-defined functions and events that can be easily used in contracts and do not require any additional implementation. For example, you will be using the ERC-20 token's interface to interact with it, so that your contract can communicate with the token.
+These tokens have pre-defined functions and events that can be easily used in contracts and do not require any additional implementation. For example, you will be using the ERC-20 token's interface to interact with cUSD smart contract, so that your smart contract can communicate with the token.
 
 You can find more information on how to use these functions and events in the Celo **[documentation](https://docs.celo.org/developer-guide/celo-for-eth-devs)**. The documentation also provides more details on how to interact with ERC-20 tokens and how to use them with the Celo network.
 
-Next up, you would need to create a contract(in this case you name the contract `celoinvest`) and then define a way for investments to be tracked on the blockchain, including who made the investment, how much they invested, and when the investment matures and is paid back.
+Next up, you would need to create a contract(in this case you name the contract `celoinvest`) and then define a way for investments to be tracked on the blockchain, including who invested, how much they invested, and when the investment matures and is paid back.
 
-```js
+```solidity
 contract celoinvest{
     struct Investment{
         address payable investor;
@@ -85,39 +102,46 @@ contract celoinvest{
         bool isPaid;
         uint timestamp;
     }
+
+}
 ```
 
-Inside the contract, there is a data structure defined called "Investment". The Investment structure has several properties, including:
+Inside the contract body, we create a struct called "Investment". The Investment struct has several properties, including:
 
-- `investor`: This is the Ethereum address of the investor who is making the investment. The address is marked as payable, which means that funds can be sent to this address.
-- `name`: This is a string that represents the name of the investor.
-- `identificationNumber`: This is a string that represents a unique identification number for the investor.
-- `amount`: This is a uint (unsigned integer) that represents the amount of ether (the cryptocurrency used on the Ethereum blockchain) that the investor is investing.
-- `duration`: This is a uint that represents the duration of the investment in some units of time (e.g. seconds).
-- `isMature`: This is a boolean value that will be set to true once the investment has reached maturity (i.e. the duration has passed).
-- `isPaid`: This is a boolean value that will be set to true once the investor has been paid back their investment.
-- `timestamp`: This is a uint that represents the timestamp (in seconds since the Unix epoch) at which the investment was made.
-  
+- `investor`: This is the Ethereum address of the investor who is investing. The `address` is marked as payable, which means that funds can be sent to this address.
+- `name`: This is a `string` that represents the name of the investor.
+- `identificationNumber`: This is a `string` that represents a unique identification number for the investor.
+- `amount`: This is a `uint` (unsigned integer) that represents the amount of Ether (the cryptocurrency used on the Ethereum blockchain) that the investor is investing.
+- `duration`: This is a `uint` that represents the duration of the investment in some units of time (e.g. seconds).
+- `isMature`: This is a boolean value that will be set to *true* once the investment has reached maturity (i.e. the duration has passed).
+- `isPaid`: This is a boolean value that will be set to *true* once the investor has been paid back their investment.
+- `timestamp`: This is a `uint` that represents the timestamp (in seconds since the Unix epoch) at which the investment was made.
 
-```js
+
+```solidity
+    uint internal investmentLength = 0;
     uint internal taxFee = 1000000000000000000;
     mapping (uint => Investment) internal investments;
-        uint internal investmentLength = 0;
-
+    address public admin;
+    
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
 ```
 
-The first line declares a variable named `taxFee` and assigns it a value of `1000000000000000000`. , which is the smallest unit of ether (the native cryptocurrency of the Ethereum blockchain) representing 1cUSD.
+The first line declares a variable named `investmentLength` which will be used to keep track of the number of investments made.
 
-The second line declares a mapping data structure called "investments" that associates unsigned integer keys with "Investment" objects. This mapping is marked as "internal", which means it can only be accessed from within the current contract.
+The second line declares a variable named `taxFee` and assigns it a value of `1000000000000000000`. , which is in wei and represents one cUSD.
 
-The third line declares a variable named `cUsdTokenAddress` and assigns it a value of 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1. This is the address of a smart contract that represents `cUSD`
+The third line declares a mapping data structure called `investments` that associates unsigned integer keys with `Investment` structs. This mapping is marked as `internal`, which means it can only be accessed from within the current contract.
 
-You are then going to declare the modifiers. Modifiers are like functions that can modify the behaviour of other functions or methods they are applied to.
+The fourth line declares a variable named `admin` that will be used to store the `address` of the deployer.
 
-```js
+The fifth line declares a variable named `cUsdTokenAddress` and assigns it a value of `0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1`. This is the address of the cUSD smart contract.
+
+You are then going to declare the modifiers. Modifiers are like functions that can modify the behavior of other functions or methods to which they are applied to.
+
+```solidity
     modifier isAdmin(uint _id){
-         require(msg.sender == address(this),"Accessible only to the admin");
+         require(msg.sender == admin,"Accessible only to the admin");
         _;
     }
     
@@ -127,21 +151,23 @@ You are then going to declare the modifiers. Modifiers are like functions that c
     }
     
 ```
-The first modifier `isAdmin` takes an input parameter `id` of type `uint` and checks if the sender of the current message (i.e., the user who is interacting with the smart contract) is the same as the smart contract itself. If the sender is not the contract, then the function call will fail and display an error message "Accessible only to the admin". If the sender is the contract, then the function call will proceed and the _ placeholder will be replaced with the code of the function being modified.
+The first modifier `isAdmin` takes an input parameter `id` of type `uint` and checks if the sender of the transaction(i.e., the user who is interacting with the smart contract) is admin of the smart contract. If the sender is not the admin, then the function call will fail and display an error message "Accessible only to the admin". If the sender is the admin, then the function call will proceed and the `_` placeholder will be replaced with the code of the function being modified.
 
-The second modifier `isOwner` takes an input parameter `_index` of type `uint` and checks if the sender of the current message is the same as the address stored in the `investor` property of the `Investment` struct associated with the given `index` in the `investments` mapping. If the sender is not the owner of that investment, then the function call will fail and display an error message "Accessible only to the owner". If the sender is the owner, then the function call will proceed and the _ placeholder will be replaced with the code of the function being modified.
+The second modifier `isOwner` takes an input parameter `_index` of type `uint` and checks if the sender of the transaction is the same as the address stored in the `investor` property of the `Investment` struct associated with the given `index` in the `investments` mapping. If the sender is not the owner of that investment, then the function call will fail and display an error message "Accessible only to the owner". If the sender is the owner, then the function call will proceed and the `_` placeholder will be replaced with the code of the function being modified.
 
-_Please note that the isAdmin variable can take any address as this address would be in charge of receiving the funds and also making other changes in the smart contract_
+Following the previous declarations, you would then write the `invest()` function which is a `public` function, meaning that it can be called by anyone who has access to the smart contract.
 
-Following the previous declarations, you would then write the `invest` function which is a public function, meaning that it can be called by anyone who has access to the smart contract.
-
-```js
-function invest(
+```solidity
+    function invest(
         string memory _name,
         string memory _identification,
         uint _amount,
         uint _duration
     )public{
+        require(bytes(_name).length > 0, "Empty name");
+        require(bytes(_name).length > 0, "Empty name");
+        require(_amount > 0.1 ether, "Invalid amount");
+        require(_duration > 0, "Invalid duration");
         require(
               IERC20Token(cUsdTokenAddress).transferFrom(
                 msg.sender,
@@ -161,20 +187,20 @@ function invest(
             block.timestamp
         );
         
-        investmentLength++
+        investmentLength++;
     }
 ```
 
-The function takes in four input parameters of type `string`, `string`, `uint`, and `uint`, respectively. These input parameters are used to create a new `Investment` object in the `investments` mapping.
+The function takes in four input parameters of type `string`, `string`, `uint`, and `uint`, respectively. These input parameters are used to create a new `Investment` struct in the `investments` mapping.
 
-The first thing that the function does is to check if the smart contract can transfer the specified amount of `cUSD` from the sender's address (i.e., the address that called this function) to the smart contract's address. If the transfer fails for any reason, an error message "This transaction could not be performed" will be displayed.
+The function first checks if the input arguments are valid. It then checks whether the smart contract can transfer the specified amount of `cUSD` from the sender's address (i.e., the address that called this function) to the smart contract's address. If the transfer fails for any reason, an error message "This transaction could not be performed" will be displayed.
 
-If the transfer is successful, then a new `Investment` object is created in the "investments" mapping. This object contains various properties, such as the investor's address, the investment amount, the investment duration, and a few flags indicating the status of the investment. The function then increments the `investmentLength` variable, which is used to keep track of the number of investments in the mapping.
+If the transfer is successful, then a new `Investment` struct is created in the `investments` mapping. This object contains various properties, such as the investor's address, the investment amount, the investment duration, and a few flags indicating the status of the investment. The function then increments the `investmentLength` variable, which is used to keep track of the number of investments in the mapping.
 
 
-The next function would be called `getInvestments` which retrieves the details of an investment based on its index in the `investments` array.
+The next function would be called `getInvestments()` which retrieves the details of an investment based on its index in the `investments` mapping.
 
-```js
+```solidity
     function getInvestments(uint _index) public view isAdmin(_index) returns(
         address payable,
         string memory,
@@ -199,17 +225,16 @@ The next function would be called `getInvestments` which retrieves the details o
     }
 ```
 
-The function takes one parameter, `_index`, which represents the index of the investment in the array. The `isAdmin` modifier is used to ensure that only the contract owner can call this function which we created earlier.
+The function takes one parameter, `_index`, which represents the index of the investment in the mapping. The `isAdmin` modifier is used to ensure that only the contract owner can call this function which we created earlier.
 
-The function returns several pieces of information about the investment, including the investor's address, name, identification number, investment amount, duration, maturity status, payment status, and timestamp.
-To learn more about solidity timestamps, click [here](https://soliditytips.com/articles/solidity-dates-time-operations/)
+The function returns several pieces of information about the investment, including the investor's address, name, identification number, investment amount, duration, maturity status, payment status, and timestamp. To learn more about Solidity timestamps, click [here](https://soliditytips.com/articles/solidity-dates-time-operations/)
 
-The investment details are retrieved from the `investments` array using the specified index, and then returned as a tuple. The `memory` keyword is used to indicate that the string variables are stored in `memory` rather than `storage`.
+The investment details are retrieved from the `investments` mapping using the specified index, and then returned as a tuple. The `memory` keyword is used to indicate that the string variables are stored in `memory` rather than `storage`.
 
 
-After you are done with this, you create a function to check if an investment is mature. 
+After you are done with this, you create a function to check if an investment is mature.
 
-```js
+```solidity
     function isInvestmentMature(uint _index)public view isAdmin(_index)returns(bool) {
         if(block.timestamp > (investments[_index].timestamp + 2 minutes)){
             return true;
@@ -218,39 +243,42 @@ After you are done with this, you create a function to check if an investment is
     }
 ```
 
-In this tutorial we used a fixed time of two minutes, for a full fledged dapp, you would most likely pass in a dynamic number of investment days instead of a hardcoded one. 
+In this tutorial we used a fixed time of two minutes, for a full-fledged dapp, you would most likely pass in a dynamic number of investment days instead of a hardcoded one. 
 
 This function checks whether the current block timestamp (measured in seconds since the Unix epoch) is greater than 2 minutes(_this could be 2 days, 2 hours as required_) after the timestamp of the investment specified by the `_index` parameter. If it is, the function returns `true`, indicating that the investment is mature. Otherwise, it returns `false`.
 
-You are then going to create the `payInvestor` and `isUserAdmin` functions. The `payInvestor` function would be used to pay the investor while the `isUserAdmin` function would be used to make sure the address inputed is the admin address.
+You are then going to create the `payInvestor` and `isUserAdmin` functions. The `payInvestor` function would be used to pay the investor while the `isUserAdmin` function would be used to make sure the address used as the input argument is the admin address.
 
-```js
+```solidity
     function payInvestor(uint _index) public isAdmin(_index){
+        require(!investments[_index].isPaid, "Investment has already been paid");
+        require(isInvestmentMature(_index), "Investment duration isn't over yet");
         require(
               IERC20Token(cUsdTokenAddress).transfer(
                 investments[_index].investor,
-                investments[_index].amount+investments[_index].duration * 15/100
+                investments[_index].amount+ investments[_index].duration * 15/100
               ),    
               "This transaction could not be performed"
         );
         investments[_index].isPaid = true;
     }
-    // function to check if the user is an admin
+
+        // function to check if the user is an admin
     function isUserAdmin(address _address) public view returns (bool){
-        if(_address == address(this)){
+        if(_address == admin){
             return true;
         }
         return false;
     }
 ```
-The `payInvestor` function has a parameter `_index`, which is used to identify the investment to be paid out. It uses the `isAdmin` modifier, which checks if the caller of the function is an admin, before executing the function. The `require` statement checks if the transfer of tokens from the contract's `cUsdTokenAddress` to the investor's address was successful. If successful, the `isPaid` variable of the investment at the given index is set to `true`. The amount paid out to the investor is the sum of the investment amount and 15% of the investment duration.
+The `payInvestor()` function has a parameter `_index`, which is used to identify the investment to be paid out. It uses the `isAdmin` modifier, which checks if the caller of the function is the admin, before executing the function. The first two `require` statements ensure that only *unpaid* and *matured* investments can be paid. The third `require` statement checks if the transfer of cUSD tokens from the smart contract to the investor's address was successful. If successful, the `isPaid` variable of the investment at the given index is set to `true`. The amount paid out to the investor is the sum of the investment amount and 15% of the investment duration.
 
-The `isUserAdmin` function checks if the given address is the same as the contract's address. If it is, the function returns `true`, indicating that the address is an admin. If not, it returns `false`. You can use this function to check the admin status of an address before calling functions that require admin privileges, such as the `payInvestor` function.
+The `isUserAdmin()` function checks if the given address is the same as the admin's address. If it is, the function returns `true`, indicating that the address is an admin. If not, it returns `false`. You can use this function to check the admin status of an address before calling functions that require admin privileges, such as the `payInvestor()` function.
 
 
 Your final function would be the `getInvestmentLength()` which is marked with the `public` and `view` visibility modifiers. This function provides a way for external parties to read the value of the `investmentLength` state variable without modifying the state of the contract.
 
-```js
+```solidity
     function getInvestmentLength() public view returns (uint){
         return investmentLength;
     }
@@ -258,12 +286,12 @@ Your final function would be the `getInvestmentLength()` which is marked with th
 
 The `public` modifier means that the function can be called externally by anyone who has access to the contract. The `view` modifier indicates that the function does not modify the contract state and only returns some data.
 
-The function returns a value of type `uint`, which is an unsigned integer. This value represents the length of an investment, and is retrieved from a state variable called `investmentLength`.
+The function returns a value of type `uint`, which is an unsigned integer. This value represents the length of an investment and is retrieved from a state variable called `investmentLength`.
 
 
 Here is the full code:
 
-```js
+```solidity
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.7.0 <0.9.0;
@@ -308,17 +336,22 @@ contract celoinvest{
     uint internal investmentLength = 0;
     uint internal taxFee = 1000000000000000000;
     mapping (uint => Investment) internal investments;
+    address public admin;
     
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
     
     modifier isAdmin(uint _id){
-         require(msg.sender == address(this),"Accessible only to the admin");
+         require(msg.sender == admin,"Accessible only to the admin");
         _;
     }
     
     modifier isOwner(uint _index) {
         require(msg.sender == investments[_index].investor,"Accessible only to the owner");
         _;
+    }
+
+    constructor(){
+        admin = msg.sender;
     }
     
     function invest(
@@ -327,6 +360,10 @@ contract celoinvest{
         uint _amount,
         uint _duration
     )public{
+        require(bytes(_name).length > 0, "Empty name");
+        require(bytes(_name).length > 0, "Empty name");
+        require(_amount > 0.1 ether, "Invalid amount");
+        require(_duration > 0, "Invalid duration");
         require(
               IERC20Token(cUsdTokenAddress).transferFrom(
                 msg.sender,
@@ -380,10 +417,12 @@ contract celoinvest{
     }
     
     function payInvestor(uint _index) public isAdmin(_index){
+        require(!investments[_index].isPaid, "Investment has already been paid");
+        require(isInvestmentMature(_index), "Investment duration isn't over yet");
         require(
               IERC20Token(cUsdTokenAddress).transfer(
                 investments[_index].investor,
-                investments[_index].amount+investments[_index].duration * 15/100
+                investments[_index].amount+ investments[_index].duration * 15/100
               ),    
               "This transaction could not be performed"
         );
@@ -391,7 +430,7 @@ contract celoinvest{
     }
     // function to check if the user is an admin
     function isUserAdmin(address _address) public view returns (bool){
-        if(_address == address(this)){
+        if(_address == admin){
             return true;
         }
         return false;
@@ -412,9 +451,9 @@ To deploy the contract, we would need:
 
 Download the Celo Extension Wallet from the Google chrome store using the link above. After doing that, create a wallet, and store your key phrase in a very safe place to avoid permanently losing your funds.
 
-After downloading and creating your wallet, you will need to fund it using the Celo Faucet. Copy the address to your wallet, click the link to the faucet above and paste the address into the text field, and confirm.
+After downloading and creating your wallet, you will need to fund it using the Celo Faucet. Copy the address of your wallet, click the link to the faucet above and paste the address into the text field, and confirm.
 
-Next up, on remix, download and activate the celo plugin from the plugin manager. Connect your wallet and deploy your contract.
+Next up, on Remix, download and activate the Celo plugin from the plugin manager. Connect your wallet and deploy your contract.
 
 
 ## The HTML Part of the Dapp
@@ -527,7 +566,7 @@ Open the index.html file located in the public folder of your project, and let's
 ```
 
 ## App.js
-In a React application, the App.js file serves as the entry point for the frontend. Its main responsibility is to define the layout and structure of other components. The App component serves as the top-level container that holds all other components.
+In a React application, the `App.js` file serves as the entry point for the front end. Its main responsibility is to define the layout and structure of other components. The App component serves as the top-level container that holds all other components.
 The beginning of the App.js file typically consists of imports for necessary libraries, components, and hooks.
 
 ```js
@@ -711,7 +750,7 @@ You then move to the definition of functions
 - `matureHandler()`: This function is called when the user wants to mark an investment as matured. It calls the `isInvestmentMature()` function from the smart contract with the investment `index`. Once the transaction is confirmed, it calls the `listOfInvestments()` function to update the list of investments.
 - `payInvestment()`: This function is called when the user wants to pay an investor. It approves the contract to spend cUSD on the user's behalf using the `approve()` function from the cUSD contract. It then calls the `payInvestor()` function from the smart contract with the investment index. Once the transaction is confirmed, it calls the `listOfInvestments()` function to update the list of investments. The function also calculates the amount to pay the investor based on the investment amount and a fixed percentage.
 
-After the definition of functions, we then call some of these functions using the `useEffect()` prop that would enable it be called when the app first runs
+After the definition of functions, we then call some of these functions using the `useEffect()` prop that would enable it to be called when the app first runs
 
 ```js
 useEffect(() => {
@@ -762,11 +801,11 @@ export default App;
 
 The first `useEffect` hook runs only once, when the component mounts, and calls the `connection()` function.
 
-The second useEffect hook runs whenever the kit or address variables change. If both variables are truthy, the `getUSDBalance()` function is called. Otherwise, a message is logged to the console.
+The second `useEffect` hook runs whenever the `kit` or `address` variables change. If both variables are truthy, the `getUSDBalance()` function is called. Otherwise, a message is logged to the console.
 
-The third useEffect hook runs whenever the contract variable changes. If the contract variable is truthy, the `listOfInvestments(`) and `isUserAdmin()` functions are called.
+The third `useEffect` hook runs whenever the contract variable changes. If the contract variable is truthy, the `listOfInvestments(`) and `isUserAdmin()` functions are called.
 
-The JSX code in the return statement includes a Router component from the react-router-dom library, a Navbar component with `usdBalance` and `isAdmin` props, a `Switch` component with two Route components. The first Route component is for the home page and renders a Banner component with an invest prop. The second Route component is for the `/admin` path and renders a `MyAdmin` component with investments, matureHandler, and payInvestment props, but only if the `isAdmin` prop is truthy. Additionally, there is a `MyInvestments` component that renders a list of `userInvestments`.
+The JSX code in the return statement includes a Router component from the react-router-dom library, a Navbar component with `usdBalance` and `isAdmin` props, and a `Switch` component with two Route components. The first Route component is for the home page and renders a Banner component with an invest prop. The second Route component is for the `/admin` path and renders a `MyAdmin` component with investments, matureHandler, and payInvestment props, but only if the `isAdmin` prop is truthy. Additionally, there is a `MyInvestments` component that renders a list of `userInvestments`.
 
 
 ## Banner.js
@@ -1019,6 +1058,8 @@ const MyInvestments = (props) => {
 export default MyInvestments;
 ```
 
-After completing the development of your React DApp, you should attempt to compile it to ensure that it is functioning correctly. If everything appears to be working correctly, you can then deploy your DApp on platforms such as Github Pages or Netlify. For reference, you can use the project available at https://github.com/evie-zee/celoinvest as an example and obtain necessary files and images to edit your own project.
+## Conclusion
+
+After completing the development of your React dApp, you should attempt to compile it to ensure that it is functioning correctly. If everything appears to be working correctly, you can then deploy your DApp on platforms such as Github Pages or Netlify. For reference, you can use the project available at https://github.com/evie-zee/celoinvest as an example and obtain the necessary files and images to edit your own project.
 
 
